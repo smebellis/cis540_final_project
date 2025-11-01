@@ -1,0 +1,8 @@
+python prepare_finetune_data.py   --in_csv combined3.csv   --out_ioc_jsonl instruct_ioc_chat2.jsonl   --out_attr_jsonl instruct_attribution_chat2.jsonl
+
+python build_cti_dataset_3.py   --input_dir ./CTIDataset   --apt_map ./apt_map.csv   --out_csv combined3.csv   --out_jsonl combined3.jsonl   --out_instruct_ioc instruct_ioc.jsonl   --out_instruct_attrib instruct_attribution.jsonl
+
+python build_report_id_freq.py   --input_dir ./CTIDataset   --out_csv report_id_frequency.csv
+
+python build_apt_map_2.py --input_dir ./CTIDataset --out_csv ./apt_map.csv
+
