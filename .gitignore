@@ -209,3 +209,7 @@ __marimo__/
 /CTIDataset
 /json_dir
 /11_16_2025
+*combined3.csv
+*commands.txt
+*generate_rag_dataset.py
+/archive

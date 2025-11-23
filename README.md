@@ -1,42 +1,84 @@
-# cis540_final_project
-Project-4: Building custom LLM for cyber threat intelligence
+1. Project Objective
 
-Set up environment (Transformers, PEFT, bitsandbytes, accelerate, wandb).
+Build a lightweight, domain-specialized LLM capable of supporting cyber threat intelligence (CTI) tasks—specifically:
 
-Log in to Hugging Face Hub + W&B.
+Given an APT group name, generate a complete, structured list of Indicators of Compromise (IOCs).
 
-Download chatgpt-oss-20b model + tokenizer; confirm inference works.
+To achieve this, the project implemented a full PEFT/QLoRA fine-tuning pipeline on Qwen3-4B-Instruct-2507 using custom CTI datasets.
 
-Define objective (SFT vs domain LM).
+2. Environment Setup
 
-Build dataset:
+Install:
 
-Normalize chat turns → unified text template.
+Transformers, PEFT, bitsandbytes, accelerate, wandb
 
-Tokenize.
+Log in to:
 
-Mask non-target tokens with -100 in labels.
+Hugging Face Hub
 
-Train/val split.
+Weights & Biases
 
-Choose finetuning style (LoRA first).
+Load base model and tokenizer; validate inference works.
 
-Wrap model with LoRA using PEFT (optionally 4-bit load).
+Configure hardware for 4-bit quantized training.
 
-Configure Trainer:
+3. Training Approach
 
-TrainingArguments (batch size, lr, fp16/bf16, logging_steps, save_steps, wandb).
+Two-stage supervised fine-tuning (SFT):
 
-DataCollator for causal LM.
+Stage 1 — IOC Extraction Skill
 
-train + eval datasets.
+Dataset: instruct_ioc_qwen_clean.jsol
 
-Run a smoke test on a tiny subset, confirm W&B logs + no OOM.
+Goal: teach extraction of IOCs from “Observed Values” text.
 
-Run full training, checkpointing periodically.
+Stage 2 — APT → IOC Specialization
 
-Save/merge adapter weights, tokenizer, and chat template.
+Dataset: qwen_optimized_apt_ioc_chat.jsonl
 
-Evaluate generations vs baseline and capture examples in W&B Tables.
+Goal: teach the model to map APT Name → Aggregated IOC List.
 
-(Optional) Push adapter + model card to Hugging Face Hub.
+Finetuning Style
+
+QLoRA (4-bit model loading)
+
+LoRA applied to:
+
+q_proj, k_proj, v_proj, o_proj
+
+gate_proj, up_proj, down_proj
+
+5. Training Pipeline
+Workflow
+
+Normalize chat messages → unified Qwen text template.
+
+Optionally mask non-assistant tokens (current pipeline does NOT mask).
+
+Train/validation split.
+
+Wrap model with PEFT/LoRA.
+
+Configure SFTTrainer:
+
+Batch size 1
+
+LR = 1e-4 (Stage 1), 5e-5 (Stage 2)
+
+16 gradient accumulation steps
+
+2 epochs each
+
+BF16 compute
+
+Cosine LR schedule
+
+W&B logging
+
+Smoke test on small subset.
+
+Run full training and checkpoint regularly.
+
+Save & push LoRA adapters to Hugging Face Hub.
+
+Log qualitative evaluations in W&B Tables.
